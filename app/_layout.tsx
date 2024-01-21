@@ -1,56 +1,55 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { Provider } from '../context/Provider';
+import {
+  useFonts,
+  DMSans_400Regular,
+  DMSans_400Regular_Italic,
+  DMSans_500Medium,
+  DMSans_500Medium_Italic,
+  DMSans_700Bold,
+  DMSans_700Bold_Italic
+} from '@expo-google-fonts/dm-sans';
+import { HeaderBackButton } from '../components/Button';
+import Toast from 'react-native-toast-message';
+import { LoadingScreen } from '../components/LoadingScreen';
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
-
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
+  // const [fontsLoaded] = useFonts({
+  //   DMSans_400Regular,
+  //   DMSans_400Regular_Italic,
+  //   DMSans_500Medium,
+  //   DMSans_500Medium_Italic,
+  //   DMSans_700Bold,
+  //   DMSans_700Bold_Italic
+  // });
+
+  const [fontsLoaded] = useFonts({
+    DMSans: require('../assets/fonts/DMSans.ttf')
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
-
-  useEffect(() => {
-    if (loaded) {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [fontsLoaded]);
 
-  if (!loaded) {
+  if (!fontsLoaded) {
     return null;
   }
 
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+    <Provider>
+      <Stack
+        screenOptions={{
+          headerBackTitleVisible: false,
+          headerLeft: HeaderBackButton
+        }}
+      ></Stack>
+      <LoadingScreen />
+      <Toast keyboardOffset={100} type="success" />
+    </Provider>
   );
 }
